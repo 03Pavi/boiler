@@ -11,8 +11,15 @@ import {
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { AlertDemo } from "@/components/ui/molecules/Alert";
+import Navbar from "@/components/ui/molecules/header";
 export default function TableDemo() {
   const [todos, setTodo] = useState([]);
+  const [err, setError] = useState(false);
+  const [errText, setErrorText] = useState("");
+  const router = useRouter();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -21,20 +28,38 @@ export default function TableDemo() {
           await axios
             .get(`api/todo`)
             .then((res: any) => {
+              setError(false);
               setTodo(res.data.data);
             })
             .catch((err) => {
-              console.error(err?.response?.data?.message);
+              if (err.response?.data.message === "Token Expired") {
+                setError(true);
+                setErrorText(err.response?.data.message);
+                router.push("/");
+              } else {
+                setError(true);
+                setErrorText(err.response?.data.message);
+              }
             });
         }
-      } catch {
-        console.log("error");
+      } catch (error) {
+        console.error("Something went Wrong!");
       }
     };
     fetchData();
+
+    const timer = setTimeout(() => {
+      setError(false);
+      setErrorText("");
+    }, 2000);
+    // Cleanup the timer to prevent memory leks
+    return () => clearTimeout(timer);
   }, []);
+
   return (
     <div className="container mx-auto">
+      <Navbar />
+      {err && <AlertDemo error={errText} />}
       <Table>
         <TableCaption>A list of your recent Todos.</TableCaption>
         <TableHeader>
@@ -44,7 +69,7 @@ export default function TableDemo() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {todos.length > 0 ? (
+          {todos?.length > 0 ? (
             todos.map((i: { text: string }, id) => (
               <TableRow key={id}>
                 <TableCell className="font-medium">{id + 1}</TableCell>

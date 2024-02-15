@@ -1,9 +1,9 @@
 import connectToServer from "@/lib/server";
 import Todo from "@/app/models/todo.model";
 import User from "@/app/models/user.model";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 const GET = async () => {
   await connectToServer();
   const cookieStore = cookies();
@@ -11,24 +11,27 @@ const GET = async () => {
   if (!token) {
     return NextResponse.json({ message: "unauthorized" }, { status: 401 });
   }
-  const data = jwt.verify(
-    token?.value,
-    process.env.NEXT_PUBLIC_SECRET || "secret"
-  ) as JwtPayload | null;
-  const user = await User.findOne({ username: data?.data?.username });
-  const getAllTodo = await Todo.find({ author: user._id });
-  if (getAllTodo.length <= 0) {
-    return NextResponse.json(
-      { message: "todo list is empty" },
-      {
-        status: 404,
-      }
-    );
-  } else {
-    return NextResponse.json({ data: getAllTodo }, { status: 200 });
+  try {
+    const decoded = jwt.verify(
+      token.value,
+      process.env.NEXT_PUBLIC_SECRET || "secret"
+    ) as jwt.JwtPayload; // Type assertion
+    const user = await User.findOne({
+      username: (decoded as any).data.username,
+    });
+    const getAllTodo = await Todo.find({ author: user._id });
+    if (getAllTodo.length <= 0) {
+      return NextResponse.json(
+        { message: "todo list is empty" },
+        { status: 404 }
+      );
+    } else {
+      return NextResponse.json({ data: getAllTodo }, { status: 200 });
+    }
+  } catch (err) {
+    return NextResponse.json({ message: "Token Expired" }, { status: 401 });
   }
 };
-
 const POST = async (req: Request) => {
   const { username, todo } = await req.json();
 

@@ -18,13 +18,17 @@ import { useState } from "react";
 export default function SignUpAccount() {
   const [user, setUser] = useState({
     email: "",
+    password: "",
   });
   const router = useRouter();
   const handleRegister = async () => {
     try {
       if (user.email !== "") {
         await axios
-          .post("/api/user", { username: user.email })
+          .post("/api/user/signup", {
+            username: user.email,
+            password: user.password,
+          })
           .then((res) => {
             alert(res.data.message);
           })
@@ -35,7 +39,7 @@ export default function SignUpAccount() {
             alert(err.response.data.message);
           });
       } else {
-        alert("username is required");
+        alert("fill the correct credential");
       }
     } catch (err) {
       console.log("some error occured");
@@ -48,18 +52,29 @@ export default function SignUpAccount() {
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center">Sign up</CardTitle>
             <CardDescription className="text-center">
-              Enter your email and password to register
+              Enter your username and password to register
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Username</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder=""
                 onChange={(e) => {
                   setUser({ ...user, email: e.target.value });
+                }}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="passsword">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder=""
+                onChange={(e) => {
+                  setUser({ ...user, password: e.target.value });
                 }}
               />
             </div>

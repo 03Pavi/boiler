@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/atom/button";
 import {
   Card,
@@ -15,19 +14,21 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
 export default function LoginAccount() {
   const [user, setUser] = useState({
     email: "",
+    password: "",
   });
   const router = useRouter();
   const handleLogin = async () => {
     try {
       if (user.email !== "") {
         await axios
-          .get(`/api/user?email=${user.email}`)
+          .post(`/api/user/signin`, {
+            username: user.email,
+            password: user.password,
+          })
           .then((res) => {
-            localStorage.setItem("id", res.data.user.username);
             alert(res.data.message);
             router.push("/dashboard");
           })
@@ -54,13 +55,22 @@ export default function LoginAccount() {
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">username</Label>
               <Input
-                id="email"
-                type="email"
+                id="username"
+                type="text"
                 placeholder=""
                 onChange={(e) => {
                   setUser({ ...user, email: e.target.value });
+                }}
+              />
+              <Label htmlFor="password">Email</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder=""
+                onChange={(e) => {
+                  setUser({ ...user, password: e.target.value });
                 }}
               />
             </div>
