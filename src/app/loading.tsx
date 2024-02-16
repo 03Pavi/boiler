@@ -7,8 +7,8 @@ const Loading = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        height: "90%",
-        width: "100%",
+        height: "100vh",
+        width: "100vw",
       }}
     >
       <CircularProgress size={"24px"} />

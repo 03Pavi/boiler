@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Menu, Search } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@mui/material";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 export default function Navbar() {
   const [state, setState] = React.useState(false);
@@ -14,7 +15,10 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       const res = await axios.get("/api/user/logout");
-      if (res.data?.message.includes("out")) router.push("/");
+      if (res.data?.message.includes("out")) {
+        Cookies.remove("token");
+        router.push("/");
+      }
     } catch (err: any) {
       console.error(err.response.data?.message);
     }

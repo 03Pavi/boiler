@@ -9,8 +9,8 @@ export const POST = async (req: NextRequest) => {
   const { username, password } = await req.json();
   await connectToServer();
   const user = await User.findOne({ username });
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (isMatch) {
+  if (user) {
+    await bcrypt.compare(password, user.password);
     const Token = jwt.sign(
       {
         data: user,

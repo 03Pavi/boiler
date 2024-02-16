@@ -1,9 +1,5 @@
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/atom/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/ui/atom/alert";
 export function AlertDemo({ error }: { error: string }) {
   return (
     <Alert variant="destructive">

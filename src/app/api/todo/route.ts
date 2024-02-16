@@ -4,40 +4,60 @@ import User from "@/app/models/user.model";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
-const GET = async () => {
-  await connectToServer();
-  const cookieStore = cookies();
-  const token = cookieStore.get("token");
-  if (!token) {
-    return NextResponse.json({ message: "unauthorized" }, { status: 401 });
+import cron from "node-cron";
+const schedule = "1 * * * * *";
+const isEpired = cron.schedule(schedule, () => {
+  const token = cookies().get("token");
+  if (token) {
+    const isVerify = jwt.verify(
+      token.value,
+      process.env.NEXT_PUBLIC_SECRET || "secret"
+    ) as jwt.JwtPayload;
+    if (!isVerify) {
+      return false;
+    } else {
+      return true;
+    }
   }
+});
+const GET = async () => {
   try {
+    await connectToServer();
+    const cookieStore = cookies();
+    const token = cookieStore.get("token");
+
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+    isEpired.start();
     const decoded = jwt.verify(
       token.value,
       process.env.NEXT_PUBLIC_SECRET || "secret"
-    ) as jwt.JwtPayload; // Type assertion
-    const user = await User.findOne({
-      username: (decoded as any).data.username,
-    });
+    ) as jwt.JwtPayload;
+
+    // Current timestamp in seconds
+
+    const user = await User.findOne({ username: decoded.data.username });
     const getAllTodo = await Todo.find({ author: user._id });
+
     if (getAllTodo.length <= 0) {
       return NextResponse.json(
-        { message: "todo list is empty" },
+        { message: "Todo list is empty" },
         { status: 404 }
       );
     } else {
       return NextResponse.json({ data: getAllTodo }, { status: 200 });
     }
   } catch (err) {
-    return NextResponse.json({ message: "Token Expired" }, { status: 401 });
+    return NextResponse.json({ message: "Token Expired" }, { status: 500 });
   }
 };
+
 const POST = async (req: Request) => {
   const { username, todo } = await req.json();
-
   if (!todo) {
     return NextResponse.json({
-      message: "Feilds can't be empty",
+      message: "Fields can't be empty",
     });
   }
 

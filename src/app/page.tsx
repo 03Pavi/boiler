@@ -1,8 +1,8 @@
-import LoginAccount from "@/components/ui/molecules/Login";
+import LoginAccount from "@/ui/molecules/Login";
 import React from "react";
 
 const page = () => {
-  return <LoginAccount/>;
+  return <LoginAccount />;
 };
 
 export default page;

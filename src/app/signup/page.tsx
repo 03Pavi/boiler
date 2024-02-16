@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/atom/button";
+import { Button } from "@/ui/atom/button";
 import {
   Card,
   CardHeader,
@@ -8,9 +8,9 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from "@/components/ui/atom/card";
-import { Input } from "@/components/ui/atom/input";
-import { Label } from "@/components/ui/atom/label";
+} from "@/ui/atom/card";
+import { Input } from "@/ui/atom/input";
+import { Label } from "@/ui/atom/label";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

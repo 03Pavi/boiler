@@ -1,23 +1,24 @@
-version: "3"
+version: "3.8"
 
 services:
-  #MongoDB
-  mongo_db:
-    container_name: mongo
-    image: mongo:latest
-    restart: always
-    volumes:
-      - mongo_db:/data/db
-  app:
-    build: .
+  nextjs:
+    container_name: nextjs_app
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - 3000:3000
+      - "3000:3000"
     environment:
-      APP_NAME: LearnDocker
-      PORT: 3000
-      MONGO_URL: mongodb://mongo_db:27017/curd
+      - MONGO_URL=mongodb://mongo:27017/curd
     depends_on:
-      - mongo_db
+      - mongo
+  mongo:
+    container_name: mongo_db
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
 
 volumes:
-  mongo_db: {}
+  mongo_data:

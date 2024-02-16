@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@/components/ui/atom/button";
+import { Button } from "@/ui/atom/button";
 import {
   Card,
   CardContent,
@@ -7,18 +7,25 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/atom/card";
-import { Input } from "@/components/ui/atom/input";
-import { Label } from "@/components/ui/atom/label";
+} from "@/ui/atom/card";
+import { Input } from "@/ui/atom/input";
+import { Label } from "@/ui/atom/label";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 export default function LoginAccount() {
   const [user, setUser] = useState({
     email: "",
     password: "",
   });
+  useEffect(() => {
+    const isCookie = Cookies.get("token");
+    if (isCookie) {
+      router.push("/dashboard");
+    }
+  }, []);
   const router = useRouter();
   const handleLogin = async () => {
     try {
@@ -64,7 +71,7 @@ export default function LoginAccount() {
                   setUser({ ...user, email: e.target.value });
                 }}
               />
-              <Label htmlFor="password">Email</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"

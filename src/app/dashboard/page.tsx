@@ -1,4 +1,11 @@
 "use client";
+import React, { useLayoutEffect, useState } from "react";
+import Cookies from "js-cookie";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { AlertDemo } from "@/ui/molecules/Alert";
+import Navbar from "@/ui/molecules/header";
+import Loading from "../loading";
 import {
   Table,
   TableBody,
@@ -7,84 +14,79 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/molecules/table";
-import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import { AlertDemo } from "@/components/ui/molecules/Alert";
-import Navbar from "@/components/ui/molecules/header";
+} from "@/ui/molecules/table";
 export default function TableDemo() {
   const [todos, setTodo] = useState([]);
   const [err, setError] = useState(false);
   const [errText, setErrorText] = useState("");
+  const [bool, setBool] = useState(true);
   const router = useRouter();
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     const fetchData = async () => {
       try {
         const token = Cookies.get("token");
         if (token) {
-          await axios
-            .get(`api/todo`)
-            .then((res: any) => {
-              setError(false);
-              setTodo(res.data.data);
-            })
-            .catch((err) => {
-              if (err.response?.data.message === "Token Expired") {
-                setError(true);
-                setErrorText(err.response?.data.message);
-                router.push("/");
-              } else {
-                setError(true);
-                setErrorText(err.response?.data.message);
-              }
-            });
+          const res = await axios.get(`api/todo`);
+          setTodo(res.data.data);
+          setBool(false);
+        } else {
+          router.push("/");
         }
-      } catch (error) {
-        console.error("Something went Wrong!");
+      } catch (error: any) {
+        if (error.response?.data.message === "Token Expired") {
+          setError(true);
+          setBool(false);
+          Cookies.remove("token");
+          setErrorText(error.response?.data.message);
+        } else {
+          setError(true);
+          setBool(false);
+          setErrorText(error.response?.data.message);
+        }
       }
     };
     fetchData();
-
     const timer = setTimeout(() => {
       setError(false);
       setErrorText("");
     }, 2000);
-    // Cleanup the timer to prevent memory leks
     return () => clearTimeout(timer);
   }, []);
-
   return (
-    <div className="container mx-auto">
-      <Navbar />
-      {err && <AlertDemo error={errText} />}
-      <Table>
-        <TableCaption>A list of your recent Todos.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">Sr no.</TableHead>
-            <TableHead>Message</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {todos?.length > 0 ? (
-            todos.map((i: { text: string }, id) => (
-              <TableRow key={id}>
-                <TableCell className="font-medium">{id + 1}</TableCell>
-                <TableCell>{i?.text}</TableCell>
+    <>
+      {bool ? (
+        <Loading />
+      ) : (
+        <div className="container mx-auto">
+          <Navbar />
+          {err && <AlertDemo error={errText} />}
+          <Table>
+            <TableCaption>A list of your recent Todos.</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Sr no.</TableHead>
+                <TableHead>Message</TableHead>
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={2} className="text-center">
-                List is empty
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+            </TableHeader>
+            <TableBody>
+              {todos?.length > 0 ? (
+                todos.map((i: { text: string }, id) => (
+                  <TableRow key={id}>
+                    <TableCell className="font-medium">{id + 1}</TableCell>
+                    <TableCell>{i?.text}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center">
+                    List is empty
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </>
   );
 }
