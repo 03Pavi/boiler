@@ -10,27 +10,39 @@ export const POST = async (req: NextRequest) => {
   await connectToServer();
   const user = await User.findOne({ username });
   if (user) {
-    await bcrypt.compare(password, user.password);
-    const Token = jwt.sign(
-      {
-        data: user,
-      },
-      secret,
-      {
-        expiresIn: 60,
-      }
-    );
-    cookies().set("token", Token);
-    return NextResponse.json(
-      {
-        message: "user login successfully !",
-        success: true,
-        user,
-      },
-      {
-        status: 200,
-      }
-    );
+    const isvalid = await bcrypt.compare(password, user.password);
+    if (isvalid) {
+      const Token = jwt.sign(
+        {
+          data: user,
+        },
+        secret,
+        {
+          expiresIn: 60,
+        }
+      );
+      cookies().set("token", Token);
+      return NextResponse.json(
+        {
+          message: "user login successfully !",
+          success: true,
+          user,
+        },
+        {
+          status: 200,
+        }
+      );
+    } else {
+      return NextResponse.json(
+        {
+          message: "Password is not correct!",
+          success: false,
+        },
+        {
+          status: 400,
+        }
+      );
+    }
   } else {
     return NextResponse.json(
       {

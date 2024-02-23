@@ -60,7 +60,7 @@ export default function TableDemo() {
         <div className="container mx-auto">
           <Navbar />
           {err && <AlertDemo error={errText} />}
-          <Table>
+          {/* <Table>
             <TableCaption>A list of your recent Todos.</TableCaption>
             <TableHeader>
               <TableRow>
@@ -84,7 +84,7 @@ export default function TableDemo() {
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+          </Table> */}
         </div>
       )}
     </>

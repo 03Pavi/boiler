@@ -34,12 +34,9 @@ const GET = async () => {
       token.value,
       process.env.NEXT_PUBLIC_SECRET || "secret"
     ) as jwt.JwtPayload;
-
     // Current timestamp in seconds
-
     const user = await User.findOne({ username: decoded.data.username });
     const getAllTodo = await Todo.find({ author: user._id });
-
     if (getAllTodo.length <= 0) {
       return NextResponse.json(
         { message: "Todo list is empty" },
